@@ -2,7 +2,7 @@
 
 from setuptools import setup, find_namespace_packages
 
-from mt.base.version import version
+from mt.net.version import version
 
 install_requires = [
     "mtbase>=4.5",  # mtbase without mt.net
