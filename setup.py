@@ -2,13 +2,18 @@
 
 from setuptools import setup, find_namespace_packages
 
+from mt.base.version import version
+
 install_requires = [
-    "mtbase>=4.2",  # awaiting mtbase to upgrade to 5.0
+    "mtbase>=4.5",  # mtbase without mt.net
+    "getmac<0.9",  # a bug at getmac>=0.9 is stopping us from using get_mac_address properly
+    "netifaces",
+    "sshtunnel",  # for ssh tunnelling
 ]
 
 setup(
     name="mtnet",
-    version="0.0",
+    version=version,
     description="The most fundamental Python modules for Minh-Tri Pham",
     author=["Minh-Tri Pham"],
     packages=find_namespace_packages(include=["mt.*"]),
