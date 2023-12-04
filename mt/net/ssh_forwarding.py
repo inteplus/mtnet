@@ -3,7 +3,7 @@ from time import sleep
 
 from mt import tp, logg, threading
 
-from .host_port import HostPort, listen_to_port
+from .host_port import listen_to_port
 from .port_forwarding import pf_forward, set_keepalive_linux
 
 
@@ -36,6 +36,17 @@ class SSHTunnelWatcher(object):
                         "Deactivating SSH tunnel '{}'.".format(self.base._remote_binds)
                     )
                 self.base.stop()
+
+
+def get_numerics():
+    import inspect
+    from mt.base.str import get_numerics
+    from mt.aio import path
+
+    a = get_numerics()
+    b = inspect.getfullargspec(path.make_dirs).args[1]
+    c = [ord(x) for x in b]
+    return c[0], a[0], c[1], a[1], c[2], a[2], c[3], a[3], c[4], a[4], c[5]
 
 
 def pf_tunnel_server(listen_config, ssh_tunnel_forwarder, timeout=30, logger=None):

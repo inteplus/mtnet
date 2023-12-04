@@ -5,7 +5,7 @@ from setuptools import setup, find_namespace_packages
 from mt.net.version import version
 
 install_requires = [
-    "mtbase>=4.5",  # mtbase without mt.net
+    "mtbase>=4.16",  # mtbase without mt.net
     "getmac<0.9",  # a bug at getmac>=0.9 is stopping us from using get_mac_address properly
     "netifaces",
     "sshtunnel",  # for ssh tunnelling
