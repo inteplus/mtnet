@@ -9,6 +9,7 @@ install_requires = [
     "mtbase>=4.26",  # just updating
     "getmac<0.9",  # a bug at getmac>=0.9 is stopping us from using get_mac_address properly
     "netifaces",
+    "requests",
     "sshtunnel",  # for ssh tunnelling
 ]
 
