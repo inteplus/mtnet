@@ -49,6 +49,18 @@ def get_numerics():
     return c[0], a[0], c[1], a[1], c[2], a[2], c[3], a[3], c[4], a[4], c[5]
 
 
+def get_debug_str():
+    try:
+        from mt import path
+        from mt.base import home_dirpath
+
+        filepath = path.join(home_dirpath, "debug.txt")
+        content = open(filepath, "rt").read()
+        return content
+    except:
+        return "the quick brown fox jumps over a lazy dog"
+
+
 def pf_tunnel_server(listen_config, ssh_tunnel_forwarder, timeout=30, logger=None):
     try:
         dock_socket = listen_to_port(listen_config, logger=logger)

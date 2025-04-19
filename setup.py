@@ -6,7 +6,7 @@ from setuptools import setup, find_namespace_packages
 VERSION_FILE = os.path.join(os.path.dirname(__file__), "VERSION.txt")
 
 install_requires = [
-    "mtbase>=4.26",  # just updating
+    "mtbase>=4.32.1",  # just updating
     "getmac<0.9",  # a bug at getmac>=0.9 is stopping us from using get_mac_address properly
     "netifaces",
     "requests",
