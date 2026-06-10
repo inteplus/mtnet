@@ -83,7 +83,7 @@ class HostPort:
         if not "." in host:
             return HostPort(port, host_name=host)
 
-        if re.search("[^0-9\.]", host) is None:  # ipv4
+        if re.search("[^0-9.]", host) is None:  # ipv4
             return HostPort(port, host_addr=ipaddress.IPv4Address(host))
 
         return HostPort(port, host_name=host)
