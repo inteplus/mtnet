@@ -8,16 +8,14 @@ import subprocess as sp
 
 def main(args):
     user = args.user if args.user else getuser()
-    pipi_url = f"https://localhost:5443/repository/{user}-pypi-dev/simple/"
-    pip_command = ["wml_nexus.py", "uv", "pip", "install"]
+    pipi_url = f"https://nexus.winnow.tech/repository/{user}-pypi-dev/simple/"
+    pip_command = ["uv", "pip", "install"]
     if os.getuid() == 0:
         pip_command += ["-p", "/usr/bin/python3", "--system", "--break-system-packages"]
     else:
         pip_command += []  # ["--prerelease", "allow"]
     pip_command += [
         "--allow-insecure-host",
-        "localhost",
-        "--index",
         pipi_url,
         "--index-strategy",
         "unsafe-best-match",
