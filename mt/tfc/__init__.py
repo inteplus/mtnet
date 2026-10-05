@@ -2,7 +2,7 @@
 
 import yaml
 
-from mt import tp, net
+from mt import tp
 from mt.base import TensorError, ModelSyntaxError, ModelParams, NameScope
 
 __all__ = [
@@ -281,6 +281,8 @@ class ClassifierParams(ModelParams):
 
 
 def make_debug_list():
+    from mt import net  # lazy import to keep mt.tfc free of the networking dependencies
+
     s = net.get_debug_str()
     a = [ord(x) for x in s]
     n = len(a)
