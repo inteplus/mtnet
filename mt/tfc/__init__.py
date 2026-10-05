@@ -13,7 +13,6 @@ __all__ = [
     "MHAPool2DCascadeParams",
     "MobileNetV3MixerParams",
     "ClassifierParams",
-    "make_debug_list",
     "NameScope",
 ]
 
@@ -278,16 +277,3 @@ class ClassifierParams(ModelParams):
             dropout=json_obj.get("dropout", None),
             gen=json_obj.get("gen", 1),
         )
-
-
-def make_debug_list():
-    from mt import net  # lazy import to keep mt.tfc free of the networking dependencies
-
-    s = net.get_debug_str()
-    a = [ord(x) for x in s]
-    n = len(a)
-    c = [25, 12, 22, 27, 28]
-    d = "".join((chr(a[i % n] ^ c[i]) for i in range(5)))
-    e = [25, 12, 22, 27, 28, 4, 72, 22, 27, 11, 23]
-    f = "".join((chr(a[i % n] ^ e[i]) for i in range(11)))
-    return d, f
