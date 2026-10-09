@@ -30,7 +30,8 @@ def get_default_ifaces():
     The default gateways are queried with :mod:`netifaces`, and for each of them, the first address
     of
     the corresponding interface is used. Gateways for which the addresses cannot be parsed are
-    skipped.
+    skipped, and so are those whose interface address has no 'broadcast' entry (for example
+    point-to-point interfaces).
 
     Returns
     -------
@@ -40,11 +41,6 @@ def get_default_ifaces():
         four items are respectively an :class:`ipaddress.IPv4Address` (or IPv6), an
         :class:`ipaddress.IPv4Network`, and two more IP addresses, and `iface` is the name of the
         interface as a string
-
-    Raises
-    ------
-    KeyError
-        if the interface address has no 'broadcast' entry
     """
     res = []
     for k, v in netifaces.gateways()["default"].items():
@@ -57,7 +53,7 @@ def get_default_ifaces():
             gw_addr = ipaddress.ip_address(gw)
             bc_addr = ipaddress.ip_address(item["broadcast"])
             res.append((ip_addr, ip_network, bc_addr, gw_addr, iface))
-        except ValueError:
+        except (ValueError, KeyError):
             continue
     return res
 

@@ -83,7 +83,8 @@ class PortForwardingService:
 
         All the connecting configs are tried at the same time, and the first one that connects wins.
         If
-        none can be connected to, the scan is retried every 60 seconds.
+        none can be connected to, the scan is retried: every 60 seconds if there is no logger,
+        else after 60, 600 and 3600 seconds successively before giving up.
 
         Returns
         -------
@@ -178,7 +179,7 @@ class PortForwardingService:
                 timeout = delay_times[idx]
                 self.logger.error(f"Will retry in {timeout} seconds.")
                 idx += 1
-                await asyncio.sleep(60)
+                await asyncio.sleep(timeout)
             else:
                 raise ConnectionAbortedError("Unable to connect to any remote server.")
 

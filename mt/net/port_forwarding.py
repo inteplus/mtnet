@@ -227,7 +227,7 @@ def pf_server(listen_config, connect_configs, timeout=30, logger=None):
     It listens to `listen_config`, and for every client, it connects to the first working server in
     `connect_configs`, then starts two threads to forward the data of the two directions. If it
     fails,
-    it waits for 10 seconds and restarts itself in a new thread (with the default timeout).
+    it waits for 10 seconds and restarts itself in a new thread (with the same arguments).
 
     Parameters
     ----------
@@ -331,7 +331,7 @@ def pf_server(listen_config, connect_configs, timeout=30, logger=None):
         threading.Thread(
             target=pf_server,
             args=(listen_config, connect_configs),
-            kwargs={"logger": logger},
+            kwargs={"timeout": timeout, "logger": logger},
         ).start()
 
 
