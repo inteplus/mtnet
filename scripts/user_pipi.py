@@ -38,13 +38,15 @@ if __name__ == "__main__":
         "--user",
         default=None,
         type=str,
-        help="Install packages from the nexus repo of a given user. If not, the current user's nexus repo is used.",
+        help="Install packages from the nexus repo of a given user. "
+        "If not, the current user's nexus repo is used.",
     )
     args.add_argument(
         "-U",
         "--upgrade",
         action="store_true",
-        help="Upgrade all specified packages to the newest available version. The handling of dependencies depends on the upgrade-strategy used.",
+        help="Upgrade all specified packages to the newest available version. "
+        "The handling of dependencies depends on the upgrade-strategy used.",
     )
     args.add_argument("packages", nargs="*", help="Packages to install via pip.")
     parsed_args = args.parse_args()

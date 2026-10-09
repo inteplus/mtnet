@@ -36,7 +36,8 @@ def _future_warn_install_mtnet():
         from .. import logg
 
         logg.logger.warn(
-            "The 'mt.net' section of package 'mtbase' will be moved to package 'mtnet' from version 5.0."
+            "The 'mt.net' section of package 'mtbase' will be moved to package 'mtnet' "
+            "from version 5.0."
         )
         logg.logger.warn("Please pip install mtnet in advance to avoid disruptions.")
 

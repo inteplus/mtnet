@@ -8,7 +8,8 @@ import getmac
 
 
 def get_default_ifaces():
-    """Returns a list of (host_ip_addr, subnet, broadcast, gateway_ip_address, iface) tuples of default ifaces."""
+    """Returns a list of (host_ip_addr, subnet, broadcast, gateway_ip_address, iface) tuples of
+    default ifaces."""
     res = []
     for k, v in netifaces.gateways()["default"].items():
         try:
@@ -79,7 +80,8 @@ def get_all_hosts_from_network(ip_network):
     Returns
     -------
     list
-        list of (ip_addr -> ipaddress.Ipv4Address, mac_addr -> str) pairs of detected hosts in the subnet.
+        list of (ip_addr -> ipaddress.Ipv4Address, mac_addr -> str) pairs of detected hosts in the
+        subnet.
     """
     res = []
     for addr in ip_network.hosts():

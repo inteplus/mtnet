@@ -131,7 +131,8 @@ def launch_ssh_forwarder(
     Parameters
     ----------
     listen_config : str
-        listening config as an 'addr:port' pair. For example, ':30443', '0.0.0.0:324', 'localhost:345', etc.
+        listening config as an 'addr:port' pair. For example, ':30443', '0.0.0.0:324',
+        'localhost:345', etc.
     ssh_tunnel_forwarder : sshtunnel.SSHTunnelForwarder
         a stopped SSHTunnelForwarder instance
     timeout : int
@@ -147,7 +148,8 @@ def launch_ssh_forwarder(
         )
     if not isinstance(ssh_tunnel_forwarder, sshtunnel.SSHTunnelForwarder):
         raise ValueError(
-            "The argument `ssh_tunnel_forwarder` is not an instance of sshtunnel.SSHTunnelForwarder."
+            "The argument `ssh_tunnel_forwarder` is not an instance of "
+            "sshtunnel.SSHTunnelForwarder."
         )
     threading.Thread(
         target=pf_tunnel_server,

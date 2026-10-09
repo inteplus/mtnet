@@ -23,14 +23,19 @@ setup(
         "scripts/wml_nexus.py",  # for accessing Winnow Nexus repo
         "scripts/pipi.sh",  # for pip-installing packages using uv
         "scripts/wml_pipi.sh",  # for pip-installing packages using uv and Winnow Nexus repo
-        "scripts/user_pipi.py",  # for pip-installing packages using uv and user-specific Winnow Nexus repo
-        "scripts/dmt_pipi.sh",  # for pip-installing packages using uv and Winnow Nexus repo, MT dev environment
+        # for pip-installing packages using uv and user-specific Winnow Nexus repo
+        "scripts/user_pipi.py",
+        # for pip-installing packages using uv and Winnow Nexus repo, MT dev environment
+        "scripts/dmt_pipi.sh",
         "scripts/wml_twineu.sh",  # for uploading wheels to Winnow Nexus repo
         "scripts/user_twineu.sh",  # for uploading wheels to user-specific Winnow Nexus repo
         "scripts/dmt_twineu.sh",  # for uploading wheels to Winnow Nexus repo, MT dev environment
-        "scripts/wml_build_package_and_upload_to_nexus.sh",  # for building package and uploading wheel to Winnow Nexus repo
-        "scripts/user_build_package_and_upload_to_nexus.sh",  # for building package and uploading wheel to user-specific Winnow Nexus repo
-        "scripts/dmt_build_package_and_upload_to_nexus.sh",  # for building package and uploading wheel to Winnow Nexus repo, MT dev environment
+        # for building package and uploading wheel to Winnow Nexus repo
+        "scripts/wml_build_package_and_upload_to_nexus.sh",
+        # for building package and uploading wheel to user-specific Winnow Nexus repo
+        "scripts/user_build_package_and_upload_to_nexus.sh",
+        # for building package and uploading wheel to Winnow Nexus repo, MT dev environment
+        "scripts/dmt_build_package_and_upload_to_nexus.sh",
     ],
     url="https://github.com/inteplus/mtnet",
     project_urls={
