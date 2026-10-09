@@ -49,9 +49,8 @@ def pf_shutdown_stream(connection, is_c2s):
         if connection["c2s_stream"]:
             connection["c2s_stream"] = False
             with logg.scoped_debug(
-                "Shutting down stream client {} -> server {}".format(
-                    connection["client_config"], connection["server_config"]
-                ),
+                f"Shutting down stream client {connection['client_config']} "
+                f"-> server {connection['server_config']}",
                 logger=logger,
                 curly=False,
             ):
@@ -71,9 +70,8 @@ def pf_shutdown_stream(connection, is_c2s):
         if connection["s2c_stream"]:
             connection["s2c_stream"] = False
             with logg.scoped_debug(
-                "Shutting down stream server {} -> client {}".format(
-                    connection["server_config"], connection["client_config"]
-                ),
+                f"Shutting down stream server {connection['server_config']} "
+                f"-> client {connection['client_config']}",
                 logger=logger,
                 curly=False,
             ):
@@ -116,12 +114,14 @@ def pf_forward(connection, is_c2s):
         except socket.timeout:
             if logger:
                 if is_c2s:
-                    msg = "Stream client '{}' -> server '{}' has timed out".format(
-                        connection["client_config"], connection["server_config"]
+                    msg = (
+                        f"Stream client '{connection['client_config']}' "
+                        f"-> server '{connection['server_config']}' has timed out"
                     )
                 else:
-                    msg = "Stream server '{}' -> client '{}' has timed out".format(
-                        connection["client_config"], connection["server_config"]
+                    msg = (
+                        f"Stream server '{connection['client_config']}' "
+                        f"-> client '{connection['server_config']}' has timed out"
                     )
                 with logger.scoped_warning(msg, curly=False):
                     logger.warn_last_exception()
@@ -130,8 +130,9 @@ def pf_forward(connection, is_c2s):
             break
         except OSError:
             if logger:
-                msg = "Broken connection client '{}' <-> server '{}'  because".format(
-                    connection["client_config"], connection["server_config"]
+                msg = (
+                    f"Broken connection client '{connection['client_config']}' "
+                    f"<-> server '{connection['server_config']}'  because"
                 )
                 with logger.scoped_warning(msg, curly=False):
                     logger.warn_last_exception()
@@ -181,9 +182,8 @@ def pf_server(listen_config, connect_configs, timeout=30, logger=None):
                     if result != 0:
                         if logger:
                             logger.warning(
-                                "Forward-connecting '{}' to '{}' returned {} instead of 0.".format(
-                                    client_addr, connect_config, result
-                                )
+                                f"Forward-connecting '{client_addr}' to '{connect_config}' "
+                                f"returned {result} instead of 0."
                             )
                         continue
                     if logger:
@@ -221,17 +221,15 @@ def pf_server(listen_config, connect_configs, timeout=30, logger=None):
                     if logger:
                         logger.warn_last_exception()
                         logger.warning(
-                            "Unable to forward '{}' to '{}'. Skipping to next server.".format(
-                                client_addr, connect_config
-                            )
+                            f"Unable to forward '{client_addr}' to '{connect_config}'. "
+                            "Skipping to next server."
                         )
                     continue
             else:
                 if logger:
                     logger.error(
-                        "Unable to forward to any server for client '{}' connected to '{}'.".format(
-                            client_addr, listen_config
-                        )
+                        f"Unable to forward to any server for client '{client_addr}' "
+                        f"connected to '{listen_config}'."
                     )
     finally:
         if logger:

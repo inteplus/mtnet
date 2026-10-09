@@ -183,9 +183,7 @@ class PortForwardingService:
                             self.logger.warn_last_exception()
                             self.logger.warn(
                                 "Ignored the above exception while forwarding data "
-                                "from client '{}' to server '{}'.".format(
-                                    client_addr, connect_config
-                                )
+                                f"from client '{client_addr}' to server '{connect_config}'."
                             )
                     c2s_task = None
                 elif s2c_task == item:
@@ -196,9 +194,7 @@ class PortForwardingService:
                             self.logger.warn_last_exception()
                             self.logger.warn(
                                 "Ignored the above exception while forwarding data "
-                                "from server '{}' to client '{}'.".format(
-                                    connect_config, client_addr
-                                )
+                                f"from server '{connect_config}' to client '{client_addr}'."
                             )
                     s2c_task = None
 

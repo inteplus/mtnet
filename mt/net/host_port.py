@@ -147,8 +147,8 @@ def listen_to_port(
             if logger:
                 if e.errno == 98:
                     logger.warn(
-                        "Unable to bind to local port {} which is in use. Please wait until it is "
-                        "available.".format(listen_address)
+                        f"Unable to bind to local port {listen_address} which is in use. "
+                        "Please wait until it is available."
                     )
                 else:
                     logger.warn_last_exception()

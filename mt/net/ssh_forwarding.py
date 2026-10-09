@@ -73,16 +73,15 @@ def pf_tunnel_server(listen_config, ssh_tunnel_forwarder, timeout=30, logger=Non
                 if result != 0:
                     if logger:
                         logger.warning(
-                            "Forward-connecting '{}' to '{}' returned {} instead of 0.".format(
-                                client_addr, ssh_tunnel_forwarder._remote_binds, result
-                            )
+                            f"Forward-connecting '{client_addr}' to "
+                            f"'{ssh_tunnel_forwarder._remote_binds}' returned {result} "
+                            "instead of 0."
                         )
                     continue
                 if logger:
                     logger.info(
-                        "Client '{}' forwarded to '{}'.".format(
-                            client_addr, ssh_tunnel_forwarder._remote_binds
-                        )
+                        f"Client '{client_addr}' forwarded to "
+                        f"'{ssh_tunnel_forwarder._remote_binds}'."
                     )
                 server_socket.settimeout(timeout)
                 set_keepalive_linux(server_socket)  # keep it alive
@@ -101,8 +100,9 @@ def pf_tunnel_server(listen_config, ssh_tunnel_forwarder, timeout=30, logger=Non
                 threading.Thread(target=pf_forward, args=(connection, False)).start()
             except:
                 if logger:
-                    msg = "Unable to forward '{}' to '{}'.".format(
-                        client_addr, ssh_tunnel_forwarder._remote_binds
+                    msg = (
+                        f"Unable to forward '{client_addr}' to "
+                        f"'{ssh_tunnel_forwarder._remote_binds}'."
                     )
                     with logger.scoped_warning(msg, curly=False):
                         logger.warn_last_exception()
