@@ -17,6 +17,8 @@ setup(
     name="mtnet",
     description="The most fundamental Python modules for Minh-Tri Pham",
     author="Minh-Tri Pham",
+    license="MIT",
+    license_files=["LICENSE"],
     packages=find_namespace_packages(include=["mt.*"]),
     install_requires=install_requires,
     scripts=[
