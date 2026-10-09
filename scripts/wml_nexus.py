@@ -1,5 +1,14 @@
 #!/usr/bin/env python3
 
+"""Runs a command with `localhost:5443` forwarded to the Nexus https server of Winnow.
+
+Usage: `wml_nexus.py cmd arg1 arg2 ...`
+
+If port 5443 of the localhost is already open, the command is simply run. Otherwise a port
+forwarder from `:5443` to the first reachable Nexus endpoint is started for the duration of the
+command. The exit code of the command is the exit code of this script.
+"""
+
 import asyncio
 import sys
 import subprocess
@@ -8,11 +17,25 @@ from mt import net, logg
 
 
 def execute(argv):
+    """Runs a command and exits with its return code.
+
+    Parameters
+    ----------
+    argv : list
+        the full command line, whose first item is the name of this script and the rest is the
+        command
+        to run
+    """
     res = subprocess.run(argv[1:], shell=False, check=False)
     sys.exit(res.returncode)
 
 
 async def main():
+    """Forwards port 5443 to a reachable Nexus endpoint and runs the command in `sys.argv[1:]`.
+
+    The endpoints are tried in order. The script exits with the return code of the command, or with
+    code 1 if no endpoint can be reached. If no command is given, it prints the syntax and exits.
+    """
     argv = sys.argv
     logg.logger.setLevel(logg.INFO)
 

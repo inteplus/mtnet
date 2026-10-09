@@ -1,3 +1,8 @@
+"""Asynchronous port forwarding with :mod:`asyncio`.
+
+The public function is :func:`port_forwarder_actx`.
+"""
+
 import asyncio
 import socket
 
@@ -8,17 +13,34 @@ from .port_forwarding import set_keepalive_linux
 
 
 class StreamForwarder:
+    """Forwards one chunk of data from a stream reader to a stream writer.
+
+    Parameters
+    ----------
+    reader : asyncio.StreamReader
+        the stream to read from
+    writer : asyncio.StreamWriter
+        the stream to write to
+    logger : mt.logg.IndentedLoggerAdapter, optional
+        logger for debugging purposes
+    """
+
     def __init__(self, reader, writer, logger=None):
         self.reader = reader
         self.writer = writer
         self.logger = logger
 
     async def close_writer(self):
+        """Closes the writer if it is not closing yet."""
         if not self.writer.is_closing():
             self.writer.close()
             await self.writer.wait_closed()
 
     async def __call__(self):
+        """Forwards up to 2048 bytes from the reader to the writer.
+
+        The writer is closed if the reader is at its end, or if an exception occurs.
+        """
         if self.reader.at_eof():
             await self.close_writer()
         else:
@@ -35,13 +57,46 @@ class StreamForwarder:
 
 
 class PortForwardingService:
+    """A callback for :func:`asyncio.start_server` that forwards clients to remote servers.
+
+    Every instance call handles one client connection: it finds a remote server that can be
+    connected to (see :func:`scan_remotes`) and then forwards data in both directions until both
+    sides are closed.
+
+    Parameters
+    ----------
+    listen_config : str
+        listening config as an 'addr:port' pair
+    connect_configs : iterable
+        list of connecting configs, each of which is an 'addr:port' pair
+    logger : mt.logg.IndentedLoggerAdapter, optional
+        logger for debugging purposes
+    """
+
     def __init__(self, listen_config, connect_configs, logger=None):
         self.listen_config = listen_config
         self.connect_configs = connect_configs
         self.logger = logger
 
     async def scan_remotes(self):
-        """Scans the remote configs for one that can be connected to."""
+        """Scans the remote configs for one that can be connected to.
+
+        All the connecting configs are tried at the same time, and the first one that connects wins.
+        If
+        none can be connected to, the scan is retried every 60 seconds.
+
+        Returns
+        -------
+        tuple
+            triple `(connect_config, server_reader, server_writer)` of the chosen remote
+
+        Raises
+        ------
+        ValueError
+            if a connecting config cannot be parsed
+        ConnectionAbortedError
+            if a logger is provided and no remote could be connected to after 3 retries
+        """
 
         delay_times = [60, 600, 3600]
         idx = 0
@@ -130,6 +185,15 @@ class PortForwardingService:
     async def __call__(
         self, client_reader: asyncio.StreamReader, client_writer: asyncio.StreamWriter
     ):
+        """Handles a client connection by forwarding it to a remote server.
+
+        Parameters
+        ----------
+        client_reader : asyncio.StreamReader
+            stream to read from the client
+        client_writer : asyncio.StreamWriter
+            stream to write to the client
+        """
         client_addr = client_reader._transport.get_extra_info("peername")
         sock = client_reader._transport.get_extra_info("socket")
         set_keepalive_linux(sock)
@@ -224,7 +288,25 @@ async def port_forwarder_actx(
     Returns
     -------
     server : asyncio.base_events.Server
-        the port forwarding server that can be used as an asynchronous context
+        the port forwarding server that can be used as an asynchronous context. The function itself
+        is a coroutine and has to be awaited. The server is already listening when it is returned.
+
+    Raises
+    ------
+    ValueError
+        if the listening config cannot be parsed
+
+    See Also
+    --------
+    mt.net.launch_port_forwarder : thread-based version
+
+    Examples
+    --------
+    .. code-block:: python
+
+       server = await port_forwarder_actx(":5443", ["nexus.example.com:443"])
+       async with server:
+           ...  # while here, connections to local port 5443 go to nexus.example.com:443
     """
 
     try:

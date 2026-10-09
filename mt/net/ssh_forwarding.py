@@ -1,3 +1,9 @@
+"""Port forwarding via an SSH tunnel, where the tunnel is only open while there are clients.
+
+The public items are :class:`SSHTunnelWatcher` and :func:`launch_ssh_forwarder`. They need package
+`sshtunnel`.
+"""
+
 import socket
 from time import sleep
 
@@ -8,6 +14,20 @@ from .port_forwarding import pf_forward, set_keepalive_linux
 
 
 class SSHTunnelWatcher(object):
+    """Starts an SSH tunnel on demand and stops it when the last connection closes.
+
+    Calling :func:`inc` when a client connects starts the tunnel if there was no connection. Calling
+    the instance, as the 'closed_callback' of a connection, decrements the connection count and
+    stops the tunnel when it reaches zero.
+
+    Parameters
+    ----------
+    ssh_tunnel_forwarder : sshtunnel.SSHTunnelForwarder
+        the tunnel to control
+    logger : mt.logg.IndentedLoggerAdapter, optional
+        logger for debugging purposes
+    """
+
     def __init__(self, ssh_tunnel_forwarder, logger=None):
         self.base = ssh_tunnel_forwarder
         self.logger = logger
@@ -15,6 +35,7 @@ class SSHTunnelWatcher(object):
         self.lock = threading.Lock()
 
     def inc(self):
+        """Registers a new connection, starting the tunnel if it is the first one."""
         with self.lock:
             if self.num_conns == 0:
                 if not self.base.is_alive:
@@ -26,6 +47,7 @@ class SSHTunnelWatcher(object):
             self.num_conns += 1
 
     def __call__(self):
+        """Unregisters a connection, stopping the tunnel if it was the last one."""
         with self.lock:
             self.num_conns -= 1
             if self.num_conns == 0:
@@ -37,6 +59,15 @@ class SSHTunnelWatcher(object):
 
 
 def get_numerics():
+    """Internal helper, not used by the package.
+
+    Returns
+    -------
+    tuple
+        11 integers, interleaving the character codes of the first six characters of the second
+        argument name of :func:`mt.aio.path.make_dirs` and the first five values returned by
+        :func:`mt.base.str.get_numerics`
+    """
     import inspect
     from mt.base.str import get_numerics
     from mt.aio import path
@@ -48,6 +79,23 @@ def get_numerics():
 
 
 def pf_tunnel_server(listen_config, ssh_tunnel_forwarder, timeout=30, logger=None):
+    """Runs the SSH port forwarding server in the current thread.
+
+    It listens to `listen_config`, and for every client, it starts the tunnel if necessary, connects
+    to its local bind port and forwards the data of the two directions in two threads. If it fails,
+    it waits for 10 seconds and restarts itself in a new thread.
+
+    Parameters
+    ----------
+    listen_config : str
+        listening config as an 'addr:port' pair
+    ssh_tunnel_forwarder : sshtunnel.SSHTunnelForwarder
+        a stopped SSHTunnelForwarder instance
+    timeout : int, optional
+        number of seconds for connection timeout. Default is 30.
+    logger : mt.logg.IndentedLoggerAdapter, optional
+        logger for debugging purposes
+    """
     try:
         dock_socket = listen_to_port(listen_config, logger=logger)
         watcher = SSHTunnelWatcher(ssh_tunnel_forwarder, logger=logger)
@@ -124,7 +172,10 @@ def launch_ssh_forwarder(
     timeout=30,
     logger: tp.Optional[logg.IndentedLoggerAdapter] = None,
 ):
-    """Launchs in other threads a port forwarding service via SSH tunnel.
+    """Launches in other threads a port forwarding service via SSH tunnel.
+
+    The function returns immediately after starting the service. The tunnel is started when the
+    first client connects to the listening port, and stopped when no client remains.
 
     Parameters
     ----------
@@ -133,10 +184,21 @@ def launch_ssh_forwarder(
         'localhost:345', etc.
     ssh_tunnel_forwarder : sshtunnel.SSHTunnelForwarder
         a stopped SSHTunnelForwarder instance
-    timeout : int
-        number of seconds for connection timeout
+    timeout : int, optional
+        number of seconds for connection timeout. Default is 30.
     logger : mt.logg.IndentedLoggerAdapter, optional
         logger for debugging purposes
+
+    Raises
+    ------
+    RuntimeError
+        if package `sshtunnel` cannot be imported
+    ValueError
+        if `ssh_tunnel_forwarder` is not an instance of :class:`sshtunnel.SSHTunnelForwarder`
+
+    See Also
+    --------
+    mt.net.launch_port_forwarder : forwarding to plain remote servers
     """
     try:
         import sshtunnel

@@ -1,3 +1,10 @@
+"""Port forwarding with threads: listens to a local port and forwards every connection to one of
+a list of remote servers.
+
+The public function is :func:`launch_port_forwarder`. For an asynchronous version, see
+:func:`mt.net.port_forwarder_actx`.
+"""
+
 import socket
 from time import sleep
 
@@ -11,7 +18,18 @@ def set_keepalive_linux(sock, after_idle_sec=1, interval_sec=3, max_fails=5):
 
     It activates after 1 second (after_idle_sec) of idleness,
     then sends a keepalive ping once every 3 seconds (interval_sec),
-    and closes the connection after 5 failed ping (max_fails), or 15 seconds
+    and closes the connection after 5 failed ping (max_fails), or 15 seconds.
+
+    Parameters
+    ----------
+    sock : socket.socket
+        an open TCP socket
+    after_idle_sec : int, optional
+        seconds of idleness before the first keepalive probe. Default is 1.
+    interval_sec : int, optional
+        seconds between keepalive probes. Default is 3.
+    max_fails : int, optional
+        number of failed probes after which the connection is closed. Default is 5.
     """
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
     sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, after_idle_sec)
@@ -20,9 +38,22 @@ def set_keepalive_linux(sock, after_idle_sec=1, interval_sec=3, max_fails=5):
 
 
 def set_keepalive_osx(sock, after_idle_sec=1, interval_sec=3, max_fails=5):
-    """Set TCP keepalive on an open socket.
+    """Set TCP keepalive on an open socket, on macOS.
 
-    sends a keepalive ping once every 3 seconds (interval_sec)
+    It sends a keepalive ping once every `interval_sec` seconds (3 by default). The arguments
+    `after_idle_sec` and `max_fails` are accepted for compatibility with :func:`set_keepalive_linux`
+    but are ignored.
+
+    Parameters
+    ----------
+    sock : socket.socket
+        an open TCP socket
+    after_idle_sec : int, optional
+        ignored
+    interval_sec : int, optional
+        seconds between keepalive probes. Default is 3.
+    max_fails : int, optional
+        ignored
     """
     # scraped from /usr/include, not exported by python's socket module
     TCP_KEEPALIVE = 0x10
@@ -31,6 +62,24 @@ def set_keepalive_osx(sock, after_idle_sec=1, interval_sec=3, max_fails=5):
 
 
 def pf_shutdown_socket(socket, mode, config=None, logger=None):
+    """Shuts down a socket, logging instead of raising any error.
+
+    Parameters
+    ----------
+    socket : socket.socket
+        the socket to shut down
+    mode : int
+        one of `socket.SHUT_RD`, `socket.SHUT_WR` and `socket.SHUT_RDWR`
+    config : str, optional
+        description of the socket, for logging
+    logger : mt.logg.IndentedLoggerAdapter, optional
+        logger for debugging purposes
+
+    Returns
+    -------
+    bool
+        whether the shutdown succeeded
+    """
     try:
         socket.shutdown(mode)
         return True
@@ -43,7 +92,20 @@ def pf_shutdown_socket(socket, mode, config=None, logger=None):
 
 
 def pf_shutdown_stream(connection, is_c2s):
-    """Shuts down the client->server stream or the server->client stream."""
+    """Shuts down the client->server stream or the server->client stream.
+
+    If both streams of the connection are down, the connection is marked as closed and its optional
+    'closed_callback' is invoked.
+
+    Parameters
+    ----------
+    connection : dict
+        the connection state, with keys 'client_socket', 'server_socket', 'client_config',
+        'server_config', 'logger', 'c2s_stream', 's2c_stream', 'closed' and optionally
+        'closed_callback'
+    is_c2s : bool
+        True for the client->server stream, False for the server->client stream
+    """
     logger = connection["logger"]
     if is_c2s:
         if connection["c2s_stream"]:
@@ -99,6 +161,19 @@ def pf_shutdown_stream(connection, is_c2s):
 
 
 def pf_forward(connection, is_c2s):
+    """Forwards data in one direction of a connection until the stream ends.
+
+    It is meant to run in a thread. Data is read from the source socket in chunks of 1024 bytes and
+    sent to the destination socket. On end of stream, timeout or error, the stream (and on error,
+    also the opposite one) is shut down with :func:`pf_shutdown_stream`.
+
+    Parameters
+    ----------
+    connection : dict
+        the connection state, see :func:`pf_shutdown_stream`
+    is_c2s : bool
+        True to forward from the client to the server, False for the opposite direction
+    """
     if is_c2s:
         src_socket = connection["client_socket"]
         dst_socket = connection["server_socket"]
@@ -147,6 +222,24 @@ def pf_forward(connection, is_c2s):
 
 
 def pf_server(listen_config, connect_configs, timeout=30, logger=None):
+    """Runs the port forwarding server in the current thread.
+
+    It listens to `listen_config`, and for every client, it connects to the first working server in
+    `connect_configs`, then starts two threads to forward the data of the two directions. If it
+    fails,
+    it waits for 10 seconds and restarts itself in a new thread (with the default timeout).
+
+    Parameters
+    ----------
+    listen_config : str
+        listening config as an 'addr:port' pair
+    connect_configs : iterable
+        list of connecting configs, each of which is an 'addr:port' pair
+    timeout : int, optional
+        number of seconds for connection timeout. Default is 30.
+    logger : mt.logg.IndentedLoggerAdapter, optional
+        logger for debugging purposes
+    """
     try:
         dock_socket = listen_to_port(listen_config, logger=logger)
 
@@ -248,7 +341,11 @@ def launch_port_forwarder(
     timeout=30,
     logger: tp.Optional[logg.IndentedLoggerAdapter] = None,
 ):
-    """Launchs in other threads a port forwarding service.
+    """Launches in other threads a port forwarding service.
+
+    The function returns immediately after starting the service. For every client that connects to
+    the listening port, the service tries the connecting configs in order and forwards the client to
+    the first one that accepts the connection and stays connected for at least a second.
 
     Parameters
     ----------
@@ -259,10 +356,15 @@ def launch_port_forwarder(
         list of connecting configs, each of which is an 'addr:port' pair. For example,
         'home2.sdfamily.co.uk:443', etc. Special case '::1:port' stands for localhost in ipv6 with
         a specific port.
-    timeout : int
-        number of seconds for connection timeout
+    timeout : int, optional
+        number of seconds for connection timeout. Default is 30.
     logger : mt.logg.IndentedLoggerAdapter, optional
         logger for debugging purposes
+
+    See Also
+    --------
+    mt.net.port_forwarder_actx : asynchronous version
+    mt.net.launch_ssh_forwarder : forwarding via an SSH tunnel
     """
     threading.Thread(
         target=pf_server,

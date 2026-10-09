@@ -1,3 +1,22 @@
+"""Network utilities: host info, host-port parsing, TCP port checking and port forwarding.
+
+The package re-exports everything of its submodules:
+
+- :mod:`mt.net.base` : :func:`get_hostname`, :func:`get_username`, :func:`is_port_open`,
+  :func:`get_default_ifaces`, :func:`get_all_inet4_ipaddresses`, :func:`get_all_hosts_from_network`
+  and :func:`get_public_ip_address`
+- :mod:`mt.net.host_port` : :class:`HostPort` and :func:`listen_to_port`
+- :mod:`mt.net.port_forwarding` : :func:`launch_port_forwarder`, using threads
+- :mod:`mt.net.port_forwarding_async` : :func:`port_forwarder_actx`, using :mod:`asyncio`
+- :mod:`mt.net.ssh_forwarding` : :func:`launch_ssh_forwarder`, via an SSH tunnel
+
+Examples
+--------
+>>> from mt import net
+>>> net.HostPort.from_str("localhost:8080").socket_address()
+('localhost', 8080)
+"""
+
 from .base import *
 from .host_port import *
 from .port_forwarding import *
@@ -27,6 +46,10 @@ __api__ = [
 
 # check if mtnet has been installed
 def _future_warn_install_mtnet():
+    """Warns the user to install package `mtnet`, if it is not installed.
+
+    It looks for `mtnet` in the output of `pip freeze`. It is currently not invoked.
+    """
     import subprocess as sp
 
     bash_str = 'pip freeze | grep "mtnet"'

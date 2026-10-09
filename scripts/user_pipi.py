@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 
+"""Installs packages from the user-specific Nexus pypi repository of Winnow, using `uv pip`.
+
+Usage: `user_pipi.py [-u USER] [-U] package [package ...]`
+"""
+
 import os
 import argparse
 from getpass import getuser
@@ -7,6 +12,22 @@ import subprocess as sp
 
 
 def main(args):
+    """Runs `uv pip install` for the packages, with the user's Nexus pypi repository as an index.
+
+    Parameters
+    ----------
+    args : argparse.Namespace
+        parsed arguments, with attributes `user` (str or None, the Nexus user, defaulting to the
+        current user), `upgrade` (bool, whether to pass `--upgrade`) and `packages` (list of str,
+        the
+        packages to install). When run as root, the packages are installed system-wide.
+
+    Returns
+    -------
+    subprocess.CompletedProcess
+        the result of running the command. A failing command raises
+        :class:`subprocess.CalledProcessError`.
+    """
     user = args.user if args.user else getuser()
     pipi_url = f"https://nexus.winnow.tech/repository/{user}-pypi-dev/simple/"
     pip_command = ["uv", "pip", "install"]
