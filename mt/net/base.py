@@ -16,7 +16,7 @@ def get_default_ifaces():
             gw, iface = v
             item = netifaces.ifaddresses(iface)[k][0]
             ip_addr = ipaddress.ip_address(item["addr"])
-            net_str = "{}/{}".format(item["addr"], item["netmask"])
+            net_str = f"{item['addr']}/{item['netmask']}"
             ip_network = ipaddress.ip_network(net_str, strict=False)
             gw_addr = ipaddress.ip_address(gw)
             bc_addr = ipaddress.ip_address(item["broadcast"])

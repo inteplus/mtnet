@@ -53,9 +53,7 @@ class PortForwardingService:
                     connect_hostport = HostPort.from_str(connect_config)
                     connect_address = connect_hostport.socket_address()
                 except ValueError:
-                    msg = "Unable to parse connecting config: '{}'.".format(
-                        connect_config
-                    )
+                    msg = f"Unable to parse connecting config: '{connect_config}'."
                     logg.error(msg, logger=self.logger)
                     raise
 
@@ -101,9 +99,7 @@ class PortForwardingService:
                 continue
 
             # display error messages before retrying
-            msg = "Unable to connect '{}' to any destination.".format(
-                self.listen_config
-            )
+            msg = f"Unable to connect '{self.listen_config}' to any destination."
             self.logger.error(msg)
             with self.logger.scoped_error("Reasons"):
                 for connect_config, task in task_map.items():
@@ -112,10 +108,10 @@ class PortForwardingService:
                     e = task.exception()
                     if e is None:
                         continue
-                    msg = "Connect '{}'".format(connect_config)
+                    msg = f"Connect '{connect_config}'"
                     with self.logger.scoped_error(msg):
                         if isinstance(e, socket.gaierror) and e.errno == -3:
-                            msg = "Unable to resolve host '{}'.".format(connect_config)
+                            msg = f"Unable to resolve host '{connect_config}'."
                             self.logger.warn(msg)
                         else:
                             try:
@@ -137,7 +133,7 @@ class PortForwardingService:
         client_addr = client_reader._transport.get_extra_info("peername")
         sock = client_reader._transport.get_extra_info("socket")
         set_keepalive_linux(sock)
-        msg = "Client '{}' connected to '{}'.".format(client_addr, self.listen_config)
+        msg = f"Client '{client_addr}' connected to '{self.listen_config}'."
         logg.debug(msg, logger=self.logger)
 
         # establish a connection to a server
@@ -147,7 +143,7 @@ class PortForwardingService:
             return  # MT-TODO: fix me
         sock = server_reader._transport.get_extra_info("socket")
         set_keepalive_linux(sock)
-        msg = "Client '{}' forwarded to '{}'.".format(client_addr, connect_config)
+        msg = f"Client '{client_addr}' forwarded to '{connect_config}'."
         logg.debug(msg, logger=self.logger)
 
         c2s_task = None
@@ -206,9 +202,7 @@ class PortForwardingService:
                             )
                     s2c_task = None
 
-        msg = "Client '{}' disconnected from '{}'.".format(
-            client_addr, self.listen_config
-        )
+        msg = f"Client '{client_addr}' disconnected from '{self.listen_config}'."
         logg.debug(msg, logger=self.logger)
 
 
@@ -242,9 +236,7 @@ async def port_forwarder_actx(
         listen_address = listen_hostport.socket_address()
         listen_family = socket.AF_INET6 if listen_hostport.is_v6() else socket.AF_INET
     except Exception:
-        msg = "Exception caught while parsing listening config: '{}'".format(
-            listen_config
-        )
+        msg = f"Exception caught while parsing listening config: '{listen_config}'"
         logg.error(msg, logger=logger)
         raise
 

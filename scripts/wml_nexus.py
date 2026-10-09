@@ -18,7 +18,7 @@ async def main():
 
     if len(argv) < 2:
         print("Opens localhost:5443 as nexus https and runs a command.")
-        print("Syntax: {} cmd arg1 arg2 ...".format(argv[0]))
+        print(f"Syntax: {argv[0]} cmd arg1 arg2 ...")
         sys.exit(0)
 
     if net.is_port_open("localhost", 5443, timeout=0.1):

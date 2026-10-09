@@ -36,7 +36,7 @@ def pf_shutdown_socket(socket, mode, config=None, logger=None):
         return True
     except:
         if logger:
-            msg = "Shuting down socket '{}' with mode {}".format(config, mode)
+            msg = f"Shuting down socket '{config}' with mode {mode}"
             with logger.scoped_warning(msg, curly=False):
                 logger.warn_last_exception()
         return False
@@ -155,7 +155,7 @@ def pf_server(listen_config, connect_configs, timeout=30, logger=None):
             set_keepalive_linux(client_socket)  # keep it alive
             if logger:
                 logger.info(
-                    "Client '{}' connected to '{}'.".format(client_addr, listen_config)
+                    f"Client '{client_addr}' connected to '{listen_config}'."
                 )
 
             for connect_config in connect_configs:
@@ -166,9 +166,7 @@ def pf_server(listen_config, connect_configs, timeout=30, logger=None):
                     if logger:
                         logger.warn_last_exception()
                         logger.error(
-                            "Unable to parse connecting config: '{}'".format(
-                                connect_config
-                            )
+                            f"Unable to parse connecting config: '{connect_config}'"
                         )
                     break
 
@@ -190,9 +188,7 @@ def pf_server(listen_config, connect_configs, timeout=30, logger=None):
                         continue
                     if logger:
                         logger.info(
-                            "Client '{}' forwarded to '{}'.".format(
-                                client_addr, connect_config
-                            )
+                            f"Client '{client_addr}' forwarded to '{connect_config}'."
                         )
                     server_socket.settimeout(timeout)
                     set_keepalive_linux(server_socket)  # keep it alive

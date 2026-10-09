@@ -58,17 +58,17 @@ class HostPort:
         """Serializes to a string."""
         host, port = self.socket_address()
         if self.host_addr is None:
-            return "{}:{}".format(host, port)
+            return f"{host}:{port}"
         if self.is_v6():
-            return "[{}]:{}".format(host, port)
-        return "{}:{}".format(host, port)
+            return f"[{host}]:{port}"
+        return f"{host}:{port}"
 
     @classmethod
     def from_str(cls, s: str):
         """Deserializes from a string."""
         i = s.rfind(":")
         if i < 0:
-            raise ValueError("Port not found in input: '{}'".format(s))
+            raise ValueError(f"Port not found in input: '{s}'")
         port = int(s[i + 1 :])
         host = s[:i]
 
@@ -122,7 +122,7 @@ def listen_to_port(
             if logger:
                 logger.warn_last_exception()
                 logger.error(
-                    "Unable to parse listening config: '{}'".format(listen_config)
+                    f"Unable to parse listening config: '{listen_config}'"
                 )
             return
 
@@ -156,6 +156,6 @@ def listen_to_port(
             sleep(5)
 
     if logger:
-        logger.info("Listening at '{}'.".format(listen_config))
+        logger.info(f"Listening at '{listen_config}'.")
 
     return dock_socket

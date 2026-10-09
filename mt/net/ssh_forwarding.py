@@ -20,9 +20,7 @@ class SSHTunnelWatcher(object):
                 if not self.base.is_alive:
                     if self.logger:
                         self.logger.debug(
-                            "Activating SSH tunnel '{}'.".format(
-                                self.base._remote_binds
-                            )
+                            f"Activating SSH tunnel '{self.base._remote_binds}'."
                         )
                     self.base.start()
             self.num_conns += 1
@@ -33,7 +31,7 @@ class SSHTunnelWatcher(object):
             if self.num_conns == 0:
                 if self.logger:
                     self.logger.debug(
-                        "Deactivating SSH tunnel '{}'.".format(self.base._remote_binds)
+                        f"Deactivating SSH tunnel '{self.base._remote_binds}'."
                     )
                 self.base.stop()
 
@@ -60,7 +58,7 @@ def pf_tunnel_server(listen_config, ssh_tunnel_forwarder, timeout=30, logger=Non
             set_keepalive_linux(client_socket)  # keep it alive
             if logger:
                 logger.info(
-                    "Client '{}' connected to '{}'.".format(client_addr, listen_config)
+                    f"Client '{client_addr}' connected to '{listen_config}'."
                 )
 
             watcher.inc()
