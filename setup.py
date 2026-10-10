@@ -6,7 +6,7 @@ from setuptools import setup, find_namespace_packages
 VERSION_FILE = os.path.join(os.path.dirname(__file__), "VERSION.txt")
 
 install_requires = [
-    "mtbase>=4.34.0",  # to have the model param classes in mt.base.model (re-exported by mt.tfc)
+    "mtbase>=4.34.2",  # to have the model param classes in mt.base.model (re-exported by mt.tfc)
     "getmac<0.9",  # a bug at getmac>=0.9 is stopping us from using get_mac_address properly
     "netifaces",
     "requests",
